@@ -1,4 +1,6 @@
-from matrix_helpers import mirror, remove_zero_rows_columns, rotate_90
+import copy
+
+from src.matrix_helpers import mirror, remove_zero_rows_columns, rotate_90
 
 
 # Directions:
@@ -76,6 +78,8 @@ def check_net(net, faces) -> bool:
     """
     if len(net) == 0:
         return len(faces == 0)
+
+    faces = copy.deepcopy(faces)
     
     H = len(net)
     W = len(net[0])

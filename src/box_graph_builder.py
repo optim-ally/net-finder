@@ -1,7 +1,7 @@
 import random
 
-from face import Face
-from get_all_trees import Edge
+from src.face import Face
+from src.get_all_trees import Edge
 
 
 def build_box_graph(L, H, D, randomise=False):

@@ -1,7 +1,7 @@
 import itertools
 from collections import defaultdict
 
-from edge import Edge
+from src.edge import Edge
 
 
 def is_bridge(i, j, edges):
