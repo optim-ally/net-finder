@@ -42,24 +42,107 @@ def try_net(net):
             return True
 
 
-already_seen = set()
-count = 0
+is_done = False
 
-for tree in generate_all_trees(list(range(total_faces)), adjacent_faces):
-    net = create_net(tree, faces)
+# start at (-3, -2, 1, x, x, ...)
+for off_1 in range(-3, 4):
+    for off_2 in range(-3, 4):
+        for off_3 in range(-3, 4):
+            # ignore offsets already checked
+            if (
+                (off_1 == -3) and
+                ((off_2 == -3) or ((off_2 == -2) and (off_3 < 1)))
+            ):
+                continue
+            for off_4 in range(-3, 4):
+                for off_5 in range(-3, 4):
+                    print(
+                        ".".join(str(offset) for offset in [
+                            off_1, off_2, off_3, off_4,
+                            off_5, "x", "x", "x", "x", "x"
+                        ])
+                    )
 
-    count += 1
-    if net not in already_seen:
-        print(f"\n{len(already_seen) + 1}  ({count}).")
+                    for off_6 in range(-3, 4):
+                        for off_7 in range(-3, 4):
+                            for off_8 in range(-3, 4):
+                                for off_9 in range(-3, 4):
+                                    for off_10 in range(-3, 4):
+                                        net = [
+                                            [0] * 70 for _ in range(13)
+                                        ]
+                                        offsets = [
+                                            0, off_1, off_2, off_3, off_4,
+                                            off_5, off_6, off_7, off_8, off_9,
+                                            off_10
+                                        ]
 
-        already_seen.add(net)
+                                        start = 30
+                                        cumulative_offset = start
 
-        for row in net:
-            print(
-                "".join(
-                    "[]" if el == 1 else (f"[{str(el)}" if el else "  ")
-                    for el in row
-                )
-            )
+                                        net[0][start] = 1
 
-        try_net(net)
+                                        for row, offset in enumerate(offsets):
+                                            cumulative_offset += offset
+
+                                            for j in range(4):
+                                                index = j + cumulative_offset
+                                                net[row + 1][index] = 1
+
+                                        net[12][cumulative_offset] = 1
+
+                                        net = remove_zero_rows_columns(net)
+
+                                        if try_net(net):
+                                            is_done = True
+                                            break
+
+                                    if is_done:
+                                        break
+
+                                if is_done:
+                                    break
+
+                            if is_done:
+                                break
+
+                        if is_done:
+                            break
+
+                    if is_done:
+                        break
+
+                if is_done:
+                    break
+
+            if is_done:
+                break
+
+        if is_done:
+            break
+
+    if is_done:
+        break
+
+
+# already_seen = set()
+# count = 0
+
+# for tree in generate_all_trees(list(range(total_faces)), adjacent_faces):
+#     net = create_net(tree, faces)
+
+#     count += 1
+#     if net not in already_seen:
+#         print(f"\n{len(already_seen) + 1}  ({count}).")
+
+#         already_seen.add(net)
+
+#         for row in net:
+#             print(
+#                 "".join(
+#                     "[]" if el == 1 else (f"[{str(el)}" if el else "  ")
+#                     for el in row
+#                 )
+#             )
+
+#         try_net(net)
