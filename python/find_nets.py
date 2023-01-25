@@ -5,6 +5,9 @@ from src.matrix_helpers import remove_zero_rows_columns
 from src.net_helpers import create_net, check_net
 
 
+# Specify whether you want all common nets or just one.
+find_all = False
+
 total_faces = 2 * ((LENGTH * DEPTH) + (LENGTH * HEIGHT) + (DEPTH * HEIGHT))
 
 faces, adjacent_faces = build_box_graph(LENGTH, HEIGHT, DEPTH, True)
@@ -21,25 +24,23 @@ def try_net(net):
     ]
 
     if len(matches) > 0:
-        f = open("results.txt", "a")
-        f.write("\n--------------------\n")
+        with open("results.txt", "a") as f:
+            f.write("\n--------------------\n")
 
-        for row in net:
-            f.write(
-                "".join(
-                    "[]" if el == 1 else (f"[{str(el)}" if el else "  ")
-                    for el in row
-                ) + "\n"
-            )
+            for row in net:
+                f.write(
+                    "".join(
+                        "[]" if el == 1 else (f"[{str(el)}" if el else "  ")
+                        for el in row
+                    ) + "\n"
+                )
 
-        for match in matches:
-            f.write(f"\nCommon development with {match}\n")
+            for match in matches:
+                f.write(f"\nCommon development with {match}\n")
 
-        f.close()
-
-        if len(matches) == len(target_boxes):
-            print("\nDone!")
-            return True
+            if len(matches) == len(target_boxes):
+                print("\nDone!")
+                return True
 
 
 already_seen = set()
@@ -50,7 +51,7 @@ for tree in generate_all_trees(list(range(total_faces)), adjacent_faces):
 
     count += 1
     if net not in already_seen:
-        print(f"\n{len(already_seen) + 1}  ({count}).")
+        print(f"\n{len(already_seen) + 1}  ({count} with duplicates).")
 
         already_seen.add(net)
 
@@ -62,4 +63,5 @@ for tree in generate_all_trees(list(range(total_faces)), adjacent_faces):
                 )
             )
 
-        try_net(net)
+        if try_net(net) and not find_all:
+            break

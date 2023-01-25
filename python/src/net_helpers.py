@@ -1,4 +1,4 @@
-from matrix_helpers import mirror, remove_zero_rows_columns, rotate_90
+from src.matrix_helpers import mirror, remove_zero_rows_columns, rotate_90
 
 
 # Directions:
@@ -75,7 +75,7 @@ def check_net(net, faces) -> bool:
     :rtype: bool
     """
     if len(net) == 0:
-        return len(faces == 0)
+        return len(faces) == 0
     
     H = len(net)
     W = len(net[0])
