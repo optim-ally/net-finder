@@ -5,8 +5,9 @@
 
 LENGTH = 1
 HEIGHT = 1
-DEPTH = 5
+DEPTH = 11
 
 target_boxes = [
-    (1, 2, 3),
+    (1, 2, 7),
+    (1, 3, 5),
 ]
