@@ -70,9 +70,9 @@ def try_net(net, best_score):
                 score = scores[dimensions]
 
                 if score == 0:
-                    f.write(f"\nCommon development with {match}\n")
+                    f.write(f"\nCommon development with {dimensions}\n")
                 else:
-                    f.write(f"\n{score} away from {match}\n")
+                    f.write(f"\n{score} away from {dimensions}\n")
 
             if len(matches) == len(target_boxes):
                 print("\nDone!")
