@@ -12,3 +12,6 @@ python find_nets.py
 ```
 
 It will continue until it finds a net that is common to every box. Partial matches, i.e. nets common to more than one but not all of the boxes will be written to `results.txt`.
+
+The C++ implementation is basically identical (at the time of writing) and was written to check whether it gave significantly faster results. The conclusion was that 
+it didn't. This is most likely due to the author's (my) implementation being quite Pythonic and not translating well to efficient C++. Improvements for either language are very welcome.
