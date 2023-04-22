@@ -4,7 +4,6 @@ from concurrent.futures import ProcessPoolExecutor
 from dimensions import LENGTH, DEPTH, HEIGHT, target_boxes
 from src.box_graph_builder import build_box_graph
 from src.get_all_trees import generate_all_trees
-from src.matrix_helpers import remove_zero_rows_columns
 from src.net_helpers import create_net, check_net
 
 
