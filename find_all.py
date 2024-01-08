@@ -1,3 +1,6 @@
+"""
+Program to find all common nets of a set of boxes
+"""
 from time import time
 from concurrent.futures import (
     ProcessPoolExecutor, wait, FIRST_COMPLETED, ALL_COMPLETED, Future
@@ -11,14 +14,26 @@ from python.net_helpers import create_net, is_net, stringify_net
 
 
 def try_tree(tree, faces, target_boxes):
+    """
+    Check wether a net is a net of all given boxes.
+
+    :param list[(int, int)] tree: Pairs of connected graph vertices
+    :param list[Face] faces: All vertices of the graph
+    :param tuple[list[Face]] target_boxes: All vertices of each box to check
+    :returns: String representation of a successful net or `None`
+    :rtype: str | None
+    """
     net = create_net(tree, faces)
 
     if all(is_net(net, box) for box in target_boxes):
         # found one!
         return stringify_net(net)
-    
+
+    return None
+
 
 def find_all_common_nets(dimensions):
+    """Systematically identify all common nets for the given boxes"""
     faces, adjacent_faces = build_box_graph(*dimensions[0])
     target_boxes = tuple(build_box_graph(*dims)[0] for dims in dimensions[1:])
 
@@ -32,7 +47,7 @@ def find_all_common_nets(dimensions):
                 seen.add(result)
                 print(f'\n{len(seen)}\n{result}')
 
-                with open('results.txt', 'a') as f:
+                with open('results.txt', 'a', encoding="utf-8") as f:
                     f.write(f'\n--------------------\n{len(seen)}\n{result}\n')
 
     with ProcessPoolExecutor(max_workers=PROCESSES) as executor:
@@ -51,10 +66,10 @@ def find_all_common_nets(dimensions):
 
 
 if __name__ == '__main__':
-    dimensions = parse_box_dimensions()
+    box_dimensions = parse_box_dimensions()
 
     start = time()
-    find_all_common_nets(dimensions)
+    find_all_common_nets(box_dimensions)
     end = time()
 
     print(f'\nFinished in {end - start}s')

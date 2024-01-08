@@ -1,3 +1,6 @@
+"""
+Generic constants
+"""
 from os import cpu_count
 
 

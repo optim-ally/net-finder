@@ -1,4 +1,9 @@
+"""
+Helper functions related to matrix operations
+"""
+
 def remove_zero_rows_columns(matrix):
+    """Trim rows and columns containing only 0s from a bitmap"""
     height = len(matrix)
     width = len(matrix[0]) if height else 0
 
@@ -29,6 +34,7 @@ def remove_zero_rows_columns(matrix):
 
 
 def mirror(matrix):
+    """Reflect a matrix horizontally (left becomes right)"""
     if len(matrix) == 0:
         return matrix
 
@@ -39,6 +45,7 @@ def mirror(matrix):
 
 
 def rotate_90(matrix):
+    """Rotate a matrix one quarter turn anticlockwise"""
     if len(matrix) == 0:
         return matrix
 

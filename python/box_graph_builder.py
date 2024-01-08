@@ -1,30 +1,50 @@
+"""
+Module defining the graph-creation logic
+"""
 import random
 
 from .face import Face
 from .edge import Edge
 
-
+# pylint: disable=invalid-name
 def build_box_graph(L, H, D, randomise=False):
-    # Handle surfaces in this orientation
-    #                  L
-    #             o---------o
-    #             |         |
-    #           D |   TOP   | D
-    #        D    |         |    D
-    #   o---------o---------o---------o
-    #   |         |         |         |
-    # H |  LEFT   |  FRONT  |  RIGHT  | H
-    #   |         |         |         |
-    #   o---------o---------o---------o
-    #        D    |         |    D
-    #           D |  BOTTOM | D
-    #             |         |
-    #             o---------o
-    #             |         |
-    #           H |   BACK  | H
-    #             |         |
-    #             o---------o
-    #                  L
+    """
+    Construct a graph whose nodes are the unit squares on the surface of a box
+    with given dimensions.
+
+    :param int L: Length of the box
+    :param int H: Height of the box
+    :param int D: Depth of the box
+    :param bool randomise (optional): randomly shuffle the labels of nodes
+    :returns: all nodes and connecting edges of the resulting graph
+    :rtype: (list[Face], set[Edge])
+
+    The interior of each face of the box will yield a square "grid graph".
+    Nodes beside an edge or vertex of the box will be connected to neighbouring
+    box faces, in essence "stitching" the faces of the box together.
+
+    Surfaces are considered in this orientation
+                     L
+                o---------o
+                |         |
+              D |   TOP   | D
+           D    |         |    D
+      o---------o---------o---------o
+      |         |         |         |
+    H |  LEFT   |  FRONT  |  RIGHT  | H
+      |         |         |         |
+      o---------o---------o---------o
+           D    |         |    D
+              D |  BOTTOM | D
+                |         |
+                o---------o
+                |         |
+              H |   BACK  | H
+                |         |
+                o---------o
+                     L
+    """
+    # pylint: disable=too-many-locals, too-many-branches, too-many-statements
 
     up_map = {}
     right_map = {}
@@ -33,12 +53,12 @@ def build_box_graph(L, H, D, randomise=False):
 
     faces = []
     edges = set()
-    
+
     def _add(index, a, b, c, d):
         faces.append(Face((a, b, c, d)))
 
         for other in (a, b, c, d):
-            if index < other: 
+            if index < other:
                 edges.add(Edge((index, other), index, other))
 
     ## Top surface (L x D)
@@ -181,7 +201,7 @@ def build_box_graph(L, H, D, randomise=False):
         right_map[((D + i + 1) * L) - 1] = right_starting_index + (i * D)
         left_map[right_starting_index + (i * D)] = ((D + i + 1) * L) - 1
 
-    ## Zip top and back surfaces
+    ## Stitch top and back surfaces together
     #     back  (2D+2H-1)L (2D+2H-1)L+1 ... (2D+2H)L-1
     #         L --------------------------------------
     #      top  0          1            ... L-1
@@ -190,7 +210,7 @@ def build_box_graph(L, H, D, randomise=False):
         up_map[i] = back_starting_index + i
         down_map[back_starting_index + i] = i
 
-    ## Zip top and left surfaces
+    ## Stitch top and left surfaces together
     #                                                top
     #                                            | 0
     #                           D ------------>  | L
@@ -204,10 +224,10 @@ def build_box_graph(L, H, D, randomise=False):
         up_map[left_starting_index + i] = i * L
         left_map[i * L] = left_starting_index + i
 
-    ## Zip top and right surfaces
-    #       top                       
-    #     L-1  |                
-    #     2L-1 |  <-------------------- D              
+    ## Stitch top and right surfaces together
+    #       top
+    #     L-1  |
+    #     2L-1 |  <-------------------- D
     #     ...  |                        |
     #     DL-1 |                        v
     #           ------------------------------------------------
@@ -219,7 +239,7 @@ def build_box_graph(L, H, D, randomise=False):
         up_map[right_starting_index + i] = top_index
         right_map[top_index] = right_starting_index + i
 
-    ## Zip bottom and left surfaces
+    ## Stitch bottom and left surfaces together
     #                        left
     #     (2D+2H)L+(H-1)D (2D+2H)L+(H-1)D+1 ... (2D+2H)L+HD-1
     #     ---------------------------------------------------
@@ -234,14 +254,14 @@ def build_box_graph(L, H, D, randomise=False):
         down_map[left_starting_index + i] = bottom_index
         left_map[bottom_index] = left_starting_index + i
 
-    ## Zip bottom and right surfaces
+    ## Stitch bottom and right surfaces together
     #                                        right
     #                 (2D+2H)L+(2H-1)D (2D+2H)L+(2H-1)D+1 ... (2D+2H)L+2HD-1
     #                 ------------------------------------------------------
-    #     (D+H+1)L-1 |                          ^                     
-    #     (D+H+2)L-1 |                          |                     
+    #     (D+H+1)L-1 |                          ^
+    #     (D+H+2)L-1 |                          |
     #     ...        |  <---------------------- D
-    #     (2D+H)L-1  |                                                 
+    #     (2D+H)L-1  |
     #      bottom
     right_starting_index = (2 * (D + H) * L) + (((2 * H) - 1) * D)
     for i in range(D):
@@ -249,7 +269,7 @@ def build_box_graph(L, H, D, randomise=False):
         down_map[right_starting_index + i] = bottom_index
         right_map[bottom_index] = right_starting_index + i
 
-    ## Zip back and left surfaces
+    ## Stitch back and left surfaces together
     #            | (2D+2H)L
     #         -> | (2D+2H)L+D   left
     #       /    | ...
@@ -267,7 +287,7 @@ def build_box_graph(L, H, D, randomise=False):
         left_map[left_index] = back_index
         left_map[back_index] = left_index
 
-    ## Zip back and right surfaces
+    ## Stitch back and right surfaces together
     #           (2D+2H)L+(H+1)D-1 |
     #     right (2D+2H)L+(H+2)D-1 | <-
     #           ...               |    \

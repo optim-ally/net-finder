@@ -1,3 +1,6 @@
+"""
+Helpers functions related to creation and handling of nets
+"""
 import copy
 
 from .matrix_helpers import mirror, remove_zero_rows_columns, rotate_90
@@ -18,10 +21,10 @@ def create_net(tree, faces) -> tuple[tuple[int]]:
     """
     Build a net from a spanning tree of a box.
 
-    :param list((int, int)) tree: Edges of a spanning tree (index into `faces`)
-    :param list(Face) faces: The adjacent faces of the box with orientations
+    :param list[(int, int)] tree: Edges of a spanning tree (index into `faces`)
+    :param list[Face] faces: The adjacent faces of the box with orientations
     :return: 2-dimensional tuple, bitmap of net
-    :rtype: tuple(tuple(int))
+    :rtype: tuple[tuple[int]]
     """
     total_faces = len(tree)
     edges = set(tree)
@@ -71,8 +74,8 @@ def is_net(net, faces) -> bool:
     """
     Decide whether a net is a net of a box.
 
-    :param tuple(tuple(int)) net: Bitmap of the net
-    :param list(Face) faces: The adjacent faces of the box with orientations
+    :param tuple[tuple[int]] net: Bitmap of the net
+    :param list[Face] faces: The adjacent faces of the box with orientations
     :return: Whether or not the net is a net of the box
     :rtype: bool
     """
@@ -80,14 +83,14 @@ def is_net(net, faces) -> bool:
         return len(faces) == 0
 
     faces = copy.deepcopy(faces)
-    
-    H = len(net)
-    W = len(net[0])
+
+    height = len(net)
+    width = len(net[0])
 
     total_faces = sum(sum(row) for row in net)
 
     def is_in_net(i, j):
-        return i >= 0 and j >= 0 and i < H and j < W and net[i][j] > 0
+        return 0 <= i < height and 0 <= j < width and net[i][j] > 0
 
     def check_net_at_position(start_i, start_j, rotation):
         visited_points = set()
@@ -118,7 +121,7 @@ def is_net(net, faces) -> bool:
                         return False
 
             return True
-        
+
         faces[0].orient(faces[0].adjacents[0], rotation)
 
         return (
@@ -142,8 +145,8 @@ def score_net(net, faces) -> int:
     """
     Calculate how far a net is from perfectly covering a box.
 
-    :param tuple(tuple(int)) net: Bitmap of the net
-    :param list(Face) faces: The adjacent faces of the box with orientations
+    :param tuple[tuple[int]] net: Bitmap of the net
+    :param list[Face] faces: The adjacent faces of the box with orientations
     :return: minimum number of overlaps when folding the net around the target
         box or, if there are no overlaps, -1 * (number of faces not covered)
     :rtype: int
@@ -152,14 +155,14 @@ def score_net(net, faces) -> int:
         return len(faces == 0)
 
     faces = copy.deepcopy(faces)
-    
-    H = len(net)
-    W = len(net[0])
+
+    height = len(net)
+    width = len(net[0])
 
     total_faces = sum(sum(row) for row in net)
 
     def is_in_net(i, j):
-        return i >= 0 and j >= 0 and i < H and j < W and net[i][j] > 0
+        return 0 <= i < height and 0 <= j < width and net[i][j] > 0
 
     def check_net_at_position(start_i, start_j, rotation):
         visited_points = set()
@@ -191,7 +194,7 @@ def score_net(net, faces) -> int:
                     overlaps += follow_net(adjacent, new_i, new_j)
 
             return overlaps
-        
+
         faces[0].orient(faces[0].adjacents[0], rotation)
 
         return follow_net(0, start_i, start_j)
@@ -216,6 +219,30 @@ def score_net(net, faces) -> int:
 
 
 def stringify_net(net):
+    """
+    Construct a 2D string respresentation of a net.
+
+    :param tuple[tuple[int]] net: Bitmap of the net
+    :rtype: str
+
+    Each unit square making up the net is represented by a pair of square
+    brakets `[]`, indentented to visually render the net in a monospaced font.
+
+    The function handles non-planar (i.e. self intersecting) nets with up to 9
+    concurrent overlaps by representing such overlapping squares as `[n`, where
+    `n` is the number of overlaps.
+
+    e.g.
+
+      []
+    [][][][]    is a net of a cube
+      []
+
+      [][][]
+    [][]  [][]  is a self-intersecting net of a 3 x 1 x 1 cuboid
+    []    []
+    [][2[][]
+    """
     return(
         "\n".join(
             "".join(

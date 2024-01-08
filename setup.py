@@ -1,3 +1,6 @@
+"""
+File containing process specs and search parameters
+"""
 from python.constants import DEFAULT_PROCESSES
 
 

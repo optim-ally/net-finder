@@ -1,3 +1,7 @@
+"""
+Functions to generate spanning trees of a given graph
+"""
+
 import itertools
 from collections import defaultdict
 
@@ -5,6 +9,26 @@ from .edge import Edge
 
 
 def is_bridge(i, j, edges):
+    """
+    Determine whether removing the edge (i, j) would disconnect the graph.
+
+    :param int i
+    :param int j
+    :param list[Edge] edges: All edges of the graph
+    :rtype: bool
+
+    e.g.
+
+    a-b-c-d
+    |/
+    e
+
+    The edges (b, c) and (c, d) are bridges, since removing either of them
+    would split the graph into two separate pieces.
+
+    The edge (a, b) is not a bridge: the graph would still be connected without
+    it.
+    """
     adjacents = defaultdict(list)
 
     for edge in edges:
@@ -30,8 +54,20 @@ def is_bridge(i, j, edges):
 
 
 def do_contraction(i, j, vertices, edges):
-    # Assuming i < j. Vertex i and the edges that join it to j are deleted
-    # and all edges connected to i are connected to j.
+    """
+    Contract vertices i and j: part of Winter's algorithm.
+
+    :param int i
+    :param int j: j > i
+    :param list[int] vertices: All vertices of the graph
+    :param list[Edge] edges: All edges of the graph
+    :returns: All graph vertices and edges after the contraction, plus all
+    edges that were contracted identified by their original vertex pairs.
+    :rtype: (list[int], list[Edge], list[(int, int)])
+
+    Vertex i and the edges that join it to j are deleted and all other edges
+    connected to i are connected to j.
+    """
     new_vertices = [v for v in vertices if v != i]
 
     new_edges = []
@@ -49,14 +85,32 @@ def do_contraction(i, j, vertices, edges):
 
 
 def do_deletion(i, j, edges):
-    # Assuming i < j. All edges that join vertices i and j are deleted.
+    """
+    Delete all edges between i and j: part of Winter's algorithm.
+
+    :param int i
+    :param int j: j > i
+    :param list[Edge] edges: All edges of the graph
+
+    All edges that join vertices i and j are deleted.
+    """
     new_edges = [e for e in edges if e.vertices != (i, j)]
 
     return new_edges
 
 
 def generate_all_trees(starting_vertices, starting_edges):
-    # Uses Winter's algorithm
+    """
+    Recursively generate all spanning trees of a given graph using Winter's
+    algorithm (see https://doi.org/10.1007/BF01939361).
+
+    :param list[int] starting_vertices: Labels that wil be used in the output
+    :param list[Edge] starting_edges: All edges of the graph
+    :returns: Trees in the form of lists of connected vertex pairs
+    :rtype: Generator[list[(int, int)]]
+
+    All edges that join vertices i and j are deleted.
+    """
 
     # Starting with the input graph, recursively try contracting and deleting-
     # then-contracting.
