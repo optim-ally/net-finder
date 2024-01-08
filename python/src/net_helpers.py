@@ -77,7 +77,7 @@ def check_net(net, faces) -> bool:
     :rtype: bool
     """
     if len(net) == 0:
-        return len(faces == 0)
+        return len(faces) == 0
 
     faces = copy.deepcopy(faces)
     
@@ -89,48 +89,55 @@ def check_net(net, faces) -> bool:
     def is_in_net(i, j):
         return i >= 0 and j >= 0 and i < H and j < W and net[i][j] > 0
 
-    def check_net_at_position(start_i, start_j):
-        if not is_in_net(start_i, start_j):
-            return False
-
-        visited = set()
+    def check_net_at_position(start_i, start_j, rotation):
+        visited_points = set()
+        visited_faces = set()
 
         def follow_net(face_index, i, j):
-            if face_index in visited:
-                return False
+            overlaps = 0
 
-            visited.add(face_index)
+            if face_index in visited_faces:
+                overlaps += 1
+            else:
+                visited_faces.add(face_index)
+            visited_points.add((i, j))
 
             for direction, adjacent in enumerate(faces[face_index].adjacents):
                 x_change, y_change = directions[direction]
                 new_i = i + x_change
                 new_j = j + y_change
 
-                if is_in_net(new_i, new_j) and adjacent not in visited:
+                if (
+                    is_in_net(new_i, new_j) and
+                    (new_i, new_j) not in visited_points
+                ):
                     face = faces[adjacent]
 
                     opposite_direction = (direction + 2) % 4
                     face.orient(face_index, opposite_direction)
 
-                    if not follow_net(adjacent, new_i, new_j):
-                        return False
+                    overlaps += follow_net(adjacent, new_i, new_j)
 
-            return True
+            return overlaps
 
-        return follow_net(0, start_i, start_j) and len(visited) == total_faces
+        faces[0].orient(faces[0].adjacents[0], rotation)
+
+        return follow_net(0, start_i, start_j)
 
     # Try placing the first face of the the box at each position in the net
     # in all 4 orientations then recursively trying to reach all other faces
     # via adjacent net squares.
-    for direction in range(4):
-        # Twist the net 90 degrees for each new direction.
-        if direction != 0:
-            net = rotate_90(net)
-            H, W = W, H
+    best = total_faces
 
+    for direction in range(4):
         for i in range(len(net)):
             for j in range(len(net[0])):
-                if check_net_at_position(i, j):
-                    return True
+                if is_in_net(i, j):
+                    overlaps = check_net_at_position(i, j, direction)
 
-    return False
+                    if overlaps == 0:
+                        return 0
+                    elif overlaps < best:
+                        best = overlaps
+
+    return best
